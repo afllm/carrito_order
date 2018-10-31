@@ -155,4 +155,26 @@ public class ProductoService {
 		return oReplyBean;
 
 	}
+	
+	public ReplyBean rellenaTabla() throws Exception {
+		ReplyBean oReplyBean;
+		ConnectionInterface oConnectionPool = null;
+		Connection oConnection;
+		try {
+			String strJsonFromClient = oRequest.getParameter("json");
+			Gson oGson = new Gson();
+			ProductoBean oProductoBean = new ProductoBean();
+			oProductoBean = oGson.fromJson(strJsonFromClient, ProductoBean.class);
+			oConnectionPool = ConnectionFactory.getConnection(ConnectionConstants.connectionPool);
+			oConnection = oConnectionPool.newConnection();
+			ProductoDao oProductoDao = new ProductoDao(oConnection, ob);
+			oProductoBean = oProductoDao.create(oProductoBean);
+			oReplyBean = new ReplyBean(200, oGson.toJson(oProductoBean));
+		} catch (Exception ex) {
+			throw new Exception("ERROR: Service level: create method: " + ob + " object", ex);
+		} finally {
+			oConnectionPool.disposeConnection();
+		}
+		return oReplyBean;
+	}
 }

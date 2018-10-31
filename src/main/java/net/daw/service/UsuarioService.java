@@ -20,6 +20,7 @@ import net.daw.helper.EncodingHelper;
 /**
  *
  * @author jesus
+ * @author alejandro
  */
 public class UsuarioService {
     HttpServletRequest oRequest;
@@ -160,4 +161,30 @@ public class UsuarioService {
 		return oReplyBean;
 
 	}
+	
+    public ReplyBean filltable() throws Exception {
+        ReplyBean oReplyBean;
+        ConnectionInterface oConnectionPool = null;
+        Connection oConnection;
+        ArrayList<UsuarioBean> usuarios = new ArrayList<>();
+        FillService oFillService = new FillService();
+        try {
+            Integer number = Integer.parseInt(oRequest.getParameter("number"));
+            oConnectionPool = ConnectionFactory.getConnection(ConnectionConstants.connectionPool);
+            oConnection = oConnectionPool.newConnection();
+            UsuarioDao oUsuarioDao = new UsuarioDao(oConnection, ob);
+            usuarios = oFillService.FillUsuario(number);
+            for (UsuarioBean usuario : usuarios) {
+            	oUsuarioDao.create(usuario);
+            }
+            Gson oGson = new Gson();
+            oReplyBean = new ReplyBean(200, oGson.toJson("Usuarios creados: " + number));
+        } catch (Exception ex) {
+            oReplyBean = new ReplyBean(500,
+                    "ERROR: " + EncodingHelper.escapeQuotes(EncodingHelper.escapeLine(ex.getMessage())));
+        }
+        return oReplyBean;
+    }
+	
+	
 }
